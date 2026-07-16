@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { Controller, Post, UseInterceptors, UploadedFile, Body, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFile, Body, ValidationPipe, Get } from '@nestjs/common';
 import { RownerService } from './rowner.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RownerDto } from './Rowner.dto';
@@ -31,4 +31,6 @@ export class RownerController {
     ) {
         return this.rownerService.createRowner(data, file);
     }
+
+
 }

@@ -6,9 +6,8 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-<<<<<<< Updated upstream
-  await app.listen(7000);
-=======
+
+
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
@@ -16,7 +15,8 @@ async function bootstrap() {
     transform: true,
   }));
   
-  await app.listen(3000);
->>>>>>> Stashed changes
+   await app.listen(7000);
+
+
 }
 bootstrap();
