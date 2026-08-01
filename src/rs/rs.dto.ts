@@ -13,4 +13,5 @@ export class RsDto {
     @IsOptional()
     @IsBoolean()
     isActive: boolean;
+    
 }

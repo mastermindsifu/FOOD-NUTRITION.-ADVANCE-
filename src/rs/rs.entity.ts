@@ -13,6 +13,7 @@ export class Rs {
     isActive: boolean;
     @BeforeInsert()
     generateId(){
-        this.id='user-'+ Date.now();
+        this.id = Math.floor(Math.random() * 1000000);
     }
+    @IsSt
 }

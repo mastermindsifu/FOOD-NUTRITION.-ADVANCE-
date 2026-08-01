@@ -27,6 +27,12 @@ export class RsController {
         return this.rsService.deleteuserbyusername(username);
     }
 
+    @Post
+    
+
+    
+    
+
 
 
 }

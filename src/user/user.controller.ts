@@ -1,19 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller,  Post } from '@nestjs/common';
 import { UserService } from './user.service';
+import { UserDto } from './user.dto';
 
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {}
-    @Get()
-    getUsers(){
-        return this.userService.getUsers();
-    }
-
-    @Get(':id')
-    getUserById(@Param('id') id:string){
-        return this.userService.getUserById(Number(id));
+    @Post()
+    createUser(@Body() userData:UserDto) {
+        return this.userService.createUser(userData);
     }
 
 }

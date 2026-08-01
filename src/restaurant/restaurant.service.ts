@@ -1,103 +1,101 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
-import { CreateRestaurantDto } from './dto/create-restaurant.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateRestaurantDto } from './create-restuant.dto';
+import { Restaurant } from './restaurant.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+
 
 @Injectable()
 export class RestaurantService {
-    private restaurants=[
-        {
-            id:1, 
-            name:'The Gourmet Kitchen',
-            location:'123 Main Street, Cityville',
-            menu:[
-                {name:'burger', price:12.99},
-                {name:' Pizza', price:10.99},
-                {name:'Tiramisu', price:6.99}
-            ],
-            region:'BD',},
-        {
-            id:2,
-            name:'Sushi Delight',
-            location:'456 Oak Avenue, Townsburg',
-            menu:[
-                {name:' Roll', price:8.99},
-                {name:'Spicy Tuna Roll', price:9.99},
-                {name:'Miso Soup', price:3.99}
-            ],
-            region:'Dhaka',}
-        ];
+    constructor(@InjectRepository(Restaurant) private readonly restaurantRepository: Repository<Restaurant>,
+    
 
+) {}
+    
+    async createRestaurant(restaurantData: CreateRestaurantDto): Promise<Restaurant> {
+        return this.restaurantRepository.save(restaurantData);
+    }
 
-       getAllRestaurants(){
-        return this.restaurants;
-       } 
-       
-       getRestaurantById(id:number){
-       const restaurant=  this.restaurants.find(restaurant=>restaurant.id===id);
-       if(!restaurant){
-        throw new Error(`Restaurant with id ${id} not found`);
-       }
-       return restaurant;
-       }
+    async getAllRestaurants(): Promise<Restaurant[]> {
+        return this.restaurantRepository.find();
+    }
 
-       //post 
-       createRestaurant( restaurant:CreateRestaurantDto){
-        const newRestaurant={
-            id:this.restaurants.length+1,
-            ...restaurant
-        };
-        this.restaurants.push(newRestaurant);
-        return newRestaurant;
-       }
-
-       //put
-       updateRestaurant(id:number, updateData:CreateRestaurantDto){
-        const restaurantIndex=this.restaurants.findIndex(restaurant=>restaurant.id===id);
-        if(restaurantIndex===-1){
-            throw new Error(`Restaurant with id ${id} not found`);
+    async getRestaurantById(id: number): Promise<Restaurant> {
+        if (!id) {
+            throw new Error('Restaurant ID is required');
         }
-        this.restaurants[restaurantIndex]={id,...updateData};
-        return this.restaurants[restaurantIndex];
-       }
-
-       //patch
-       patchRestaurant(id:number, updateData:Partial<{name:string,location:string,menu:Array<{name:string, price:number}>,region:string}>){
-        const restaurant=this.getRestaurantById(id);
-        Object.assign(restaurant,updateData);
+        const restaurant = await this.restaurantRepository.findOneBy({ id });
+        if (!restaurant) {
+            throw new Error('Restaurant not found');
+        }
         return restaurant;
-       }
+    }
 
-         //delete
-            deleteRestaurant(id:number){
-                const restaurantIndex=this.restaurants.findIndex(restaurant=>restaurant.id===id);
-                if(restaurantIndex===-1){
-                    throw new Error(`Restaurant with id ${id} not found`);
-                }
-                const deletedRestaurant=this.restaurants.splice(restaurantIndex,1);
-                return {message:`Restaurant with id ${id} deleted successfully`};
-            }
+    async updateRestaurant(id: number, updatedata:Partial<Restaurant>): Promise<Restaurant> {
 
-            //Query
+        const restaurant = await this.restaurantRepository.findOneBy({ id });
 
-            searchRestaurantByName(name:string){
-                const search=this.restaurants.find((restaurant)=>restaurant.name ===name);
-                if(!search){
-                    throw new Error(`Restaurant with name ${name} not found`);
-                }
-                return search;
-            }
+        if (!restaurant) {
+            throw new Error('Restaurant not found');
+        }
+        const updatedRestaurant = Object.assign(restaurant, updatedata);
+        return this.restaurantRepository.save(updatedRestaurant);
 
-        searchRestaurantByRegion(region:string){
-            const search=this.restaurants.find((restaurant)=>restaurant.region ===region);
-            if(!search){
-                throw new Error(`Restaurant with region ${region} not found`);
-            }   
-            return search;
-        }    
+    }
+
+    async deleteRestaurant(id: number): Promise<void> {
+        const restaurant = await this.restaurantRepository.delete
+        ({ id });   
+        if (restaurant.affected === 0) {
+            throw new Error('Restaurant not found');
+        }
+        
+    }
+
+    async getRestaurantByAddress(address: string): Promise<Restaurant[]> {
+        return this.restaurantRepository.findBy({ address });
+    }
+
+    async updateRestaurantStatus(id: number, updatedStatus: Partial<Restaurant>): Promise<Restaurant> {
+        const restaurant = await this.restaurantRepository.findOneBy({ id });
+        if (!restaurant) {
+            throw new NotFoundException('Restaurant not found');
+        }
+        const updatedRestaurant = Object.assign(restaurant, updatedStatus);
+        return this.restaurantRepository.save(updatedRestaurant);
+    }
 
 
+    //for resturant with menu
+    async getRestaurantMenus(id:number): Promise<Restaurant>{
+        const restaurant=await this.restaurantRepository.findOne({
+            where: {id},
+            relations:{
+                menus: true,  
+            },
+        })
+        if(!restaurant){
+            throw new NotFoundException('Restuarant not found')
+        
+        }
+        return restaurant;
+        
+    }
+    async getRestaurantMenusByName(name: string): Promise<Restaurant> {
+  const restaurant = await this.restaurantRepository.findOne({
+    where: { name },
+    relations: {menus:true},
+  });
 
+  if (!restaurant) {
+    throw new NotFoundException('Restaurant not found');
+  }
 
+  return restaurant;
 }
 
+
+    
+}
